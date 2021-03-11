@@ -15,7 +15,7 @@ namespace scuffed_explorer
     {
         private Button[] directoryButtons;
         private Label[] directoryLabels;
-        TableLayoutPanel tableLayoutPanel1 = new TableLayoutPanel();
+        private ContextMenuStrip[] menus;
         public Form1()
         {
             InitializeComponent();
@@ -27,38 +27,45 @@ namespace scuffed_explorer
             String[] childFiles = Directory.GetFiles(path);
             int total = childDirs.Length + childFiles.Length;
             int xoffset = 20, yoffset = 30, buttonsize = 60, xcur=xoffset, ycur=yoffset;
-            tableLayoutPanel1.ColumnCount = (int)(tableLayoutPanel1.Size.Width / buttonsize);
-            tableLayoutPanel1.RowCount = (int)(tableLayoutPanel1.Size.Height / (buttonsize + 10 + 30));
-            for (int i = 0; i < tableLayoutPanel1.ColumnCount; i++)
-            {
-                tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100/ tableLayoutPanel1.ColumnCount));
-            }
-            for (int i = 0; i < tableLayoutPanel1.RowCount; i++)
-            {
-                tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100 / tableLayoutPanel1.RowCount));
-            }
             directoryButtons = new Button[total];
             directoryLabels = new Label[total];
             for (int i = 0; i<childDirs.Length; i++)
             {
+                menus[i] = new ContextMenuStrip(); 
+                ToolStripMenuItem fruitToolStripMenuItem = new ToolStripMenuItem("Fruit", null, null, "Fruit");
+                fruitToolStripMenuItem.Text = "Move";
+                fruitToolStripMenuItem.Name = "Move";
+                menus[i].Items.Add(fruitToolStripMenuItem);
+                ToolStripMenuItem renamebutton = new ToolStripMenuItem();
+                renamebutton.Text = "Rename";
+                renamebutton.Name = "Rename";
+                menus[i].Items.Add(renamebutton);
+                ToolStripMenuItem deletebutton = new ToolStripMenuItem();
+                deletebutton.Text = "Delete";
+                deletebutton.Name = "Delete";
+                menus[i].Items.Add(deletebutton);
+                menus[i].ItemClicked += operateMenu;
+
                 directoryButtons[i] = new Button();
-                directoryButtons[i].BackgroundImage = Image.FromFile("C:\\Users\\ghost\\source\\repos\\scuffed-explorer\\scuffed explorer\\icons\\directory_scuffed.png");
+                directoryButtons[i].BackgroundImage = Image.FromFile("..\\..\\icons\\directory_scuffed.png");
                 directoryButtons[i].Tag = childDirs[i];
                 directoryButtons[i].BackgroundImageLayout = ImageLayout.Stretch;
                 this.directoryButtons[i].Location = new System.Drawing.Point(xcur, ycur);
                 this.directoryButtons[i].Size = new System.Drawing.Size(buttonsize, buttonsize);
                 this.directoryButtons[i].Click += button_click;
-                this.directoryButtons[i].ContextMenuStrip = contextMenuStrip1;
-                this.groupBox1.Controls.Add(directoryButtons[i]);
+                this.directoryButtons[i].ContextMenuStrip = menus[i];
 
                 directoryLabels[i] = new Label();
                 this.directoryLabels[i].Location = new System.Drawing.Point(xcur, ycur+buttonsize);
                 this.directoryLabels[i].Size = new System.Drawing.Size(buttonsize, 30);
                 directoryLabels[i].Text = childDirs[i].Substring(path.Length);
+
+                this.groupBox1.Controls.Add(directoryButtons[i]);
                 this.groupBox1.Controls.Add(directoryLabels[i]);
+                this.groupBox1.Controls.Add(menus[i]);
 
 
-                xcur+=xoffset+buttonsize;
+                xcur +=xoffset+buttonsize;
                 if (xcur+buttonsize>=groupBox1.Size.Width)
                 {
                     xcur=xoffset;
@@ -70,7 +77,7 @@ namespace scuffed_explorer
             for (int i = 0; i < childFiles.Length; i++)
             {
                 directoryButtons[totalDirs + i] = new Button();
-                directoryButtons[totalDirs + i].BackgroundImage = Image.FromFile("C:\\Users\\ghost\\source\\repos\\scuffed-explorer\\scuffed explorer\\icons\\file_scuffed.png");
+                directoryButtons[totalDirs + i].BackgroundImage = Image.FromFile("..\\..\\icons\\file_scuffed.png");
                 directoryButtons[totalDirs + i].BackgroundImageLayout = ImageLayout.Stretch;
                 this.directoryButtons[totalDirs + i].Location = new System.Drawing.Point(xcur, ycur);
                 this.directoryButtons[totalDirs + i].Size = new System.Drawing.Size(buttonsize, buttonsize);
@@ -97,22 +104,30 @@ namespace scuffed_explorer
             drawDirectory(((sender as Button).Tag as String));
         }
 
-        void deleteDir(object sender, EventArgs e)
+        void operateMenu(object sender, ToolStripItemClickedEventArgs e)
         {
-            ToolStripMenuItem mnu = sender as ToolStripMenuItem;
-            ContextMenuStrip mcm = (ContextMenuStrip)mnu.GetCurrentParent();
-            Button myButton = mcm.PlacementTarget as Button;
-            drawDirectory(textBox1.Text);   
-        }
-
-        void contextMenuDrop(object sender, EventArgs e)
-        {
-            MouseEventArgs me = (MouseEventArgs)e;
-            if (me.Button == System.Windows.Forms.MouseButtons.Right)
+            ContextMenuStrip item = sender as ContextMenuStrip;
+            string path = textBox1.Text;
+            if (item != null && e.ClickedItem.Text == "Delete")
             {
-                Button proj = (Button)sender;
-                proj.ContextMenuStrip = contextMenuStrip1;
+                try
+                {
+                    String toDelete = item.SourceControl.Tag as String;
+                    Directory.Delete(toDelete);
+                }
+                catch (System.IO.DirectoryNotFoundException)
+                {
+                    
+                }
             }
+            if (item != null && e.ClickedItem.Text == "Rename")
+            {
+                Form2 dialog = new Form2();
+                dialog.rename();
+                dialog.Show();
+            }
+            drawDirectory(path);
+            
         }
 
         private void GoButtonClicked(object sender, EventArgs e)
@@ -139,7 +154,6 @@ namespace scuffed_explorer
 
         private void Form1_Load(object sender, System.EventArgs e)
         {
-            deleteToolStripMenuItem.Click += deleteDir;
             drawDirectory("C:\\");
         }
     }
