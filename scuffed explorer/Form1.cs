@@ -8,11 +8,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Threading;
 
 namespace scuffed_explorer
 {
     public partial class Form1 : Form
     {
+        public bool commitFlag;
+        public String tempString;
         private Button[] directoryButtons;
         private Label[] directoryLabels;
         private ContextMenuStrip[] menus;
@@ -46,6 +49,12 @@ namespace scuffed_explorer
                     Name = "Rename"
                 };
                 menus[i].Items.Add(renamebutton);
+                ToolStripMenuItem copybutton = new ToolStripMenuItem()
+                {
+                    Text = "Copy",
+                    Name = "Copy"
+                };
+                menus[i].Items.Add(copybutton);
                 ToolStripMenuItem deletebutton = new ToolStripMenuItem()
                 {
                     Text = "Delete",
@@ -118,21 +127,32 @@ namespace scuffed_explorer
             if (item != null && e.ClickedItem.Text == "Delete")
             {
                 String toDelete = item.SourceControl.Tag as String;
-                Directory.Delete(toDelete);
+                Directory.Delete(toDelete, true);
             }
             if (item != null && e.ClickedItem.Text == "Rename")
             {
+                String toRename = item.SourceControl.Tag as String;
                 Form2 dialog = new Form2();
+                dialog.parentForm = this;
                 dialog.LabelText = "Rename field";
+                dialog.TextboxInput = toRename;
                 dialog.ShowDialog();
-                dialog.Close();
+                if (this.commitFlag)
+                {
+                    Directory.Move(toRename, tempString);
+                }
             }
             if (item != null && e.ClickedItem.Text == "Move")
             {
+                String toMove = item.SourceControl.Tag as String;
                 Form2 dialog = new Form2();
                 dialog.LabelText = "Move field";
+                dialog.TextboxInput = toMove;
                 dialog.ShowDialog();
-                dialog.Close();
+                if (this.commitFlag)
+                {
+                    Directory.Move(toMove, this.tempString);
+                }
             }
             drawDirectory(path);
             
@@ -150,7 +170,11 @@ namespace scuffed_explorer
             {
                 return;
             }
-            string path = textBox1.Text.Substring(0, textBox1.Text.LastIndexOf('\\')+1);
+            string path = textBox1.Text.Substring(0, textBox1.Text.LastIndexOf('\\'));
+            if (path[path.Length - 1] == ':')
+            {
+                path += "\\";
+            }
             drawDirectory(path);
         }
 

@@ -12,6 +12,7 @@ namespace scuffed_explorer
 {
     public partial class Form2 : Form
     {
+        public Form1 parentForm;
         public string LabelText
         {
             get
@@ -40,9 +41,17 @@ namespace scuffed_explorer
             InitializeComponent();
         }
 
-        public void rename()
+        private void commit(object sender, EventArgs e)
         {
-            this.label1.Text = "rename";
+            parentForm.commitFlag = true;
+            parentForm.tempString = this.textBox1.Text;
+            this.Close();
+        }
+
+        private void close(object sender, EventArgs e)
+        {
+            parentForm.commitFlag = false;
+            this.Close();
         }
     }
 }
