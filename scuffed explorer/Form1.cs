@@ -27,22 +27,30 @@ namespace scuffed_explorer
             String[] childFiles = Directory.GetFiles(path);
             int total = childDirs.Length + childFiles.Length;
             int xoffset = 20, yoffset = 30, buttonsize = 60, xcur=xoffset, ycur=yoffset;
+
+            menus = new ContextMenuStrip[childDirs.Length];
             directoryButtons = new Button[total];
             directoryLabels = new Label[total];
-            for (int i = 0; i<childDirs.Length; i++)
+            for (int i = 0; i < childDirs.Length; i++)
             {
-                menus[i] = new ContextMenuStrip(); 
-                ToolStripMenuItem fruitToolStripMenuItem = new ToolStripMenuItem("Fruit", null, null, "Fruit");
-                fruitToolStripMenuItem.Text = "Move";
-                fruitToolStripMenuItem.Name = "Move";
+                menus[i] = new ContextMenuStrip();
+                ToolStripMenuItem fruitToolStripMenuItem = new ToolStripMenuItem()
+                {
+                    Text = "Move",
+                    Name = "Move"
+                };
                 menus[i].Items.Add(fruitToolStripMenuItem);
-                ToolStripMenuItem renamebutton = new ToolStripMenuItem();
-                renamebutton.Text = "Rename";
-                renamebutton.Name = "Rename";
+                ToolStripMenuItem renamebutton = new ToolStripMenuItem()
+                {
+                    Text = "Rename",
+                    Name = "Rename"
+                };
                 menus[i].Items.Add(renamebutton);
-                ToolStripMenuItem deletebutton = new ToolStripMenuItem();
-                deletebutton.Text = "Delete";
-                deletebutton.Name = "Delete";
+                ToolStripMenuItem deletebutton = new ToolStripMenuItem()
+                {
+                    Text = "Delete",
+                    Name = "Delete"
+                };
                 menus[i].Items.Add(deletebutton);
                 menus[i].ItemClicked += operateMenu;
 
@@ -62,7 +70,6 @@ namespace scuffed_explorer
 
                 this.groupBox1.Controls.Add(directoryButtons[i]);
                 this.groupBox1.Controls.Add(directoryLabels[i]);
-                this.groupBox1.Controls.Add(menus[i]);
 
 
                 xcur +=xoffset+buttonsize;
@@ -110,21 +117,22 @@ namespace scuffed_explorer
             string path = textBox1.Text;
             if (item != null && e.ClickedItem.Text == "Delete")
             {
-                try
-                {
-                    String toDelete = item.SourceControl.Tag as String;
-                    Directory.Delete(toDelete);
-                }
-                catch (System.IO.DirectoryNotFoundException)
-                {
-                    
-                }
+                String toDelete = item.SourceControl.Tag as String;
+                Directory.Delete(toDelete);
             }
             if (item != null && e.ClickedItem.Text == "Rename")
             {
                 Form2 dialog = new Form2();
-                dialog.rename();
-                dialog.Show();
+                dialog.LabelText = "Rename field";
+                dialog.ShowDialog();
+                dialog.Close();
+            }
+            if (item != null && e.ClickedItem.Text == "Move")
+            {
+                Form2 dialog = new Form2();
+                dialog.LabelText = "Move field";
+                dialog.ShowDialog();
+                dialog.Close();
             }
             drawDirectory(path);
             
