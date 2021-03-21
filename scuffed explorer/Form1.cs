@@ -61,7 +61,7 @@ namespace scuffed_explorer
                     Name = "Delete"
                 };
                 menus[i].Items.Add(deletebutton);
-                menus[i].ItemClicked += operateMenu;
+                menus[i].ItemClicked += TimerTick;
 
                 directoryButtons[i] = new Button();
                 directoryButtons[i].BackgroundImage = Image.FromFile("..\\..\\icons\\directory_scuffed.png");
@@ -120,12 +120,28 @@ namespace scuffed_explorer
             drawDirectory(((sender as Button).Tag as String));
         }
 
+        async void TimerTick(object sender, ToolStripItemClickedEventArgs e)
+        {
+            System.Windows.Forms.Timer driveTimer = new System.Windows.Forms.Timer();
+            driveTimer.Interval = 100;
+            driveTimer.Tick += new EventHandler(kekw);
+            driveTimer.Start();
+            await Task.Run(() => operateMenu(sender, e));
+        }
+
+        void kekw(object sender, EventArgs e)
+        {
+            this.label1.Text = (int.Parse(this.label1.Text)+1).ToString();
+        }
+
+
         void operateMenu(object sender, ToolStripItemClickedEventArgs e)
         {
             ContextMenuStrip item = sender as ContextMenuStrip;
             string path = textBox1.Text;
             if (item != null && e.ClickedItem.Text == "Delete")
             {
+                Thread.Sleep(10000000);
                 String toDelete = item.SourceControl.Tag as String;
                 Directory.Delete(toDelete, true);
             }
