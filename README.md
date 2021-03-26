@@ -1,3 +1,3 @@
 # scuffed-explorer
 Scuffed version of explorer
-\nAllows browsing, moving, renaming and deleting directories
+</br>Allows browsing, moving, renaming and deleting directories
